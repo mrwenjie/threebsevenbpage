@@ -10,9 +10,13 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 600px;
+            max-width: 800px;
             margin: 0 auto;
             padding: 20px;
+            line-height: 1.6;
+        }
+        h1, h2 {
+            color: #333;
         }
         label, input, button {
             display: block;
@@ -20,12 +24,49 @@
         }
         input, button {
             width: 100%;
-            padding: 5px;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #instructions {
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
         }
     </style>
 </head>
 <body>
     <h1>3B7B Calendar Event Generator</h1>
+    
+    <div id="instructions">
+        <h2>Instructions</h2>
+        <p>This tool generates a series of calendar events based on the 3B7B (3 Business Days, 7 Business Days) routine for job search outreach. It creates an iCalendar file containing three events:</p>
+        <ol>
+            <li>An initial event to send the first email to a job search contact</li>
+            <li>A reminder event 3 business days later to check if the contact has responded, and if not, to reach out to a new contact</li>
+            <li>A reminder event 7 business days later to send a follow-up email to the contact if no response has been received</li>
+        </ol>
+        <p>To use this tool:</p>
+        <ol>
+            <li>Enter the contact's name and company</li>
+            <li>Enter the contact's email address</li>
+            <li>Select a start date (defaults to today if not set)</li>
+            <li>Click "Generate Calendar Events" to create and download the .ics file</li>
+            <li>Import the downloaded .ics file into your preferred calendar application</li>
+        </ol>
+    </div>
+
     <form id="eventForm">
         <label for="name">Contact Name:</label>
         <input type="text" id="name" required>
@@ -37,7 +78,7 @@
         <input type="email" id="email" required>
         
         <label for="startDate">Start Date:</label>
-        <input type="date" id="startDate" required>
+        <input type="date" id="startDate">
         
         <button type="submit">Generate Calendar Events</button>
     </form>
@@ -64,13 +105,19 @@
             return currentDate;
         }
 
+        // Set default date to today
+        document.addEventListener('DOMContentLoaded', function() {
+            let today = new Date().toISOString().split('T')[0];
+            document.getElementById('startDate').value = today;
+        });
+
         document.getElementById('eventForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
             let name = document.getElementById('name').value;
             let company = document.getElementById('company').value;
             let email = document.getElementById('email').value;
-            let startDate = new Date(document.getElementById('startDate').value);
+            let startDate = document.getElementById('startDate').value ? new Date(document.getElementById('startDate').value) : new Date();
 
             let cal = new ICAL.Component(['vcalendar', [], []]);
 
