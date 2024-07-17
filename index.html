@@ -18,11 +18,11 @@
         h1, h2 {
             color: #333;
         }
-        label, input, button {
+        label, input, textarea, button {
             display: block;
             margin-bottom: 10px;
         }
-        input, button {
+        input, textarea, button {
             width: 100%;
             padding: 8px;
             box-sizing: border-box;
@@ -77,7 +77,7 @@
         <label for="company">Company:</label>
         <input type="text" id="company" required>
         
-        <label for="contact">Contact Method (email, LinkedIn, phone):</label>
+        <label for="contact">Contact Method (email, LinkedIn, text message, other social media, etc.):</label>
         <input type="text" id="contact" required>
         
         <label for="startDate">Start Date:</label>
@@ -91,6 +91,9 @@
         
         <label for="sevenBTime">7B Reminder Time:</label>
         <input type="time" id="sevenBTime" value="07:00">
+        
+        <label for="note">Additional Note (optional):</label>
+        <textarea id="note"></textarea>
         
         <button type="submit">Generate Calendar Events</button>
     </form>
@@ -130,6 +133,7 @@
             let company = document.getElementById('company').value;
             let contact = document.getElementById('contact').value;
             let startDate = document.getElementById('startDate').value ? new Date(document.getElementById('startDate').value) : new Date();
+            let note = document.getElementById('note').value;
 
             let initialTime = document.getElementById('initialTime').value.split(':');
             let threeBTime = document.getElementById('threeBTime').value.split(':');
@@ -137,20 +141,30 @@
 
             let cal = new ICAL.Component(['vcalendar', [], []]);
 
+            // Create descriptions with optional note
+            let descriptionInitial = `Send the 6-Point Email to ${contact}`;
+            let description3B = `Check if ${name} has responded, otherwise reach out to a new contact. Contact: ${contact}`;
+            let description7B = `Send a follow-up email to ${name} if no response received. Contact: ${contact}`;
+            if (note) {
+                descriptionInitial += `\n\nAdditional Note: ${note}`;
+                description3B += `\n\nAdditional Note: ${note}`;
+                description7B += `\n\nAdditional Note: ${note}`;
+            }
+
             // Initial event
             let initialDate = new Date(startDate);
             initialDate.setHours(initialTime[0], initialTime[1], 0, 0);
-            createEvent(cal, `Send initial email to ${name} (${company})`, `Send the 6-Point Email to ${contact}`, initialDate, 60);
+            createEvent(cal, `Send initial email to ${name} (${company})`, descriptionInitial, initialDate, 60);
 
             // 3B event
             let threeBDate = getNextBusinessDay(startDate, 3);
             threeBDate.setHours(threeBTime[0], threeBTime[1], 0, 0);
-            createEvent(cal, `3B reminder for ${name} (${company})`, `Check if ${name} has responded, otherwise reach out to a new contact. Contact: ${contact}`, threeBDate, 60);
+            createEvent(cal, `3B reminder for ${name} (${company})`, description3B, threeBDate, 60);
 
             // 7B event
             let sevenBDate = getNextBusinessDay(startDate, 7);
             sevenBDate.setHours(sevenBTime[0], sevenBTime[1], 0, 0);
-            createEvent(cal, `7B reminder for ${name} (${company})`, `Send a follow-up email to ${name} if no response received. Contact: ${contact}`, sevenBDate, 60);
+            createEvent(cal, `7B reminder for ${name} (${company})`, description7B, sevenBDate, 60);
 
             let blob = new Blob([cal.toString()], {type: "text/calendar;charset=utf-8"});
             saveAs(blob, `${name}_${company}_3b7b_reminders.ics`);
