@@ -90,7 +90,7 @@
             event.description = description;
             event.startDate = ICAL.Time.fromJSDate(startDate, true);
             event.endDate = ICAL.Time.fromJSDate(new Date(startDate.getTime() + duration * 60000), true);
-            cal.addSubcomponent(event);
+            cal.addSubcomponent(event.component);
         }
 
         function getNextBusinessDay(date, n) {
