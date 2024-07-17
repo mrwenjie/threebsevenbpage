@@ -60,8 +60,9 @@
         <p>To use this tool:</p>
         <ol>
             <li>Enter the contact's name and company</li>
-            <li>Enter the contact's email address</li>
+            <li>Enter the contact's method (email, LinkedIn, or phone call)</li>
             <li>Select a start date (defaults to today if not set)</li>
+            <li>Adjust the times for the initial event, 3B reminder, and 7B reminder if desired</li>
             <li>Click "Generate Calendar Events" to create and download the .ics file</li>
             <li>Import the downloaded .ics file into your preferred calendar application</li>
         </ol>
@@ -74,11 +75,20 @@
         <label for="company">Company:</label>
         <input type="text" id="company" required>
         
-        <label for="email">Contact Email:</label>
-        <input type="email" id="email" required>
+        <label for="contact">Contact Method (email, LinkedIn, phone):</label>
+        <input type="text" id="contact" required>
         
         <label for="startDate">Start Date:</label>
         <input type="date" id="startDate">
+        
+        <label for="initialTime">Initial Event Time:</label>
+        <input type="time" id="initialTime" value="05:00">
+        
+        <label for="threeBTime">3B Reminder Time:</label>
+        <input type="time" id="threeBTime" value="06:00">
+        
+        <label for="sevenBTime">7B Reminder Time:</label>
+        <input type="time" id="sevenBTime" value="07:00">
         
         <button type="submit">Generate Calendar Events</button>
     </form>
@@ -116,25 +126,29 @@
 
             let name = document.getElementById('name').value;
             let company = document.getElementById('company').value;
-            let email = document.getElementById('email').value;
+            let contact = document.getElementById('contact').value;
             let startDate = document.getElementById('startDate').value ? new Date(document.getElementById('startDate').value) : new Date();
+
+            let initialTime = document.getElementById('initialTime').value.split(':');
+            let threeBTime = document.getElementById('threeBTime').value.split(':');
+            let sevenBTime = document.getElementById('sevenBTime').value.split(':');
 
             let cal = new ICAL.Component(['vcalendar', [], []]);
 
             // Initial event
             let initialDate = new Date(startDate);
-            initialDate.setHours(5, 0, 0, 0);
-            createEvent(cal, `Send initial email to ${name} (${company})`, `Send the 6-Point Email to ${email}`, initialDate, 60);
+            initialDate.setHours(initialTime[0], initialTime[1], 0, 0);
+            createEvent(cal, `Send initial email to ${name} (${company})`, `Send the 6-Point Email to ${contact}`, initialDate, 60);
 
             // 3B event
             let threeBDate = getNextBusinessDay(startDate, 3);
-            threeBDate.setHours(6, 0, 0, 0);
-            createEvent(cal, `3B reminder for ${name} (${company})`, `Check if ${name} has responded, otherwise reach out to a new contact.`, threeBDate, 60);
+            threeBDate.setHours(threeBTime[0], threeBTime[1], 0, 0);
+            createEvent(cal, `3B reminder for ${name} (${company})`, `Check if ${name} has responded, otherwise reach out to a new contact. Contact: ${contact}`, threeBDate, 60);
 
             // 7B event
             let sevenBDate = getNextBusinessDay(startDate, 7);
-            sevenBDate.setHours(7, 0, 0, 0);
-            createEvent(cal, `7B reminder for ${name} (${company})`, `Send a follow-up email to ${name} if no response received.`, sevenBDate, 60);
+            sevenBDate.setHours(sevenBTime[0], sevenBTime[1], 0, 0);
+            createEvent(cal, `7B reminder for ${name} (${company})`, `Send a follow-up email to ${name} if no response received. Contact: ${contact}`, sevenBDate, 60);
 
             let blob = new Blob([cal.toString()], {type: "text/calendar;charset=utf-8"});
             saveAs(blob, `${name}_${company}_3b7b_reminders.ics`);
