@@ -132,7 +132,7 @@
             let name = document.getElementById('name').value;
             let company = document.getElementById('company').value;
             let contact = document.getElementById('contact').value;
-            let startDate = document.getElementById('startDate').value ? new Date(document.getElementById('startDate').value) : new Date();
+            let startDate = document.getElementById('startDate').value ? moment(document.getElementById('startDate').value).startOf('day').toDate() : moment().startOf('day').toDate();
             let note = document.getElementById('note').value;
 
             let initialTime = document.getElementById('initialTime').value.split(':');
@@ -152,18 +152,15 @@
             }
 
             // Initial event
-            let initialDate = new Date(startDate);
-            initialDate.setHours(initialTime[0], initialTime[1], 0, 0);
+            let initialDate = moment(startDate).set({ hour: initialTime[0], minute: initialTime[1] }).toDate();
             createEvent(cal, `Send initial email to ${name} (${company})`, descriptionInitial, initialDate, 60);
 
             // 3B event
-            let threeBDate = getNextBusinessDay(startDate, 3);
-            threeBDate.setHours(threeBTime[0], threeBTime[1], 0, 0);
+            let threeBDate = moment(getNextBusinessDay(startDate, 3)).set({ hour: threeBTime[0], minute: threeBTime[1] }).toDate();
             createEvent(cal, `3B reminder for ${name} (${company})`, description3B, threeBDate, 60);
 
             // 7B event
-            let sevenBDate = getNextBusinessDay(startDate, 7);
-            sevenBDate.setHours(sevenBTime[0], sevenBTime[1], 0, 0);
+            let sevenBDate = moment(getNextBusinessDay(startDate, 7)).set({ hour: sevenBTime[0], minute: sevenBTime[1] }).toDate();
             createEvent(cal, `7B reminder for ${name} (${company})`, description7B, sevenBDate, 60);
 
             let blob = new Blob([cal.toString()], {type: "text/calendar;charset=utf-8"});
